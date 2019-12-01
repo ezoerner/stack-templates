@@ -1,0 +1,309 @@
+{-# START_FILE package.yaml #-}
+name:                {{name}}
+version:             0.1.0.0
+#synopsis:           Short description of your package
+#description:        Please see the README on GitHub at <https://github.com/ezoerner/empty-haskell-project#readme>
+homepage:            https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}#readme
+author:              {{author-name}}{{^author-name}}Author name here{{/author-name}}
+copyright:           {{copyright}}{{^copyright}}{{year}}{{^year}}2019{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
+category:            {{category}}{{^category}}Example{{/category}}
+
+extra-source-files:
+- README.md
+
+ghc-options: -Wall -Werror -Wno-type-defaults
+
+default-extensions:  OverloadedStrings, NoImplicitPrelude
+
+dependencies:
+- base
+- protolude
+
+library:
+  source-dirs: src
+
+executables:
+  template-project:
+    source-dirs:      app
+    main:             Main.hs
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - {{name}}
+
+tests:
+  {{name}}-test:
+    main: "Driver.hs"
+    source-dirs: "test"
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - tasty
+    - tasty-discover
+    - tasty-hspec
+    - tasty-hunit
+    - tasty-quickcheck
+    - tasty-smallcheck
+    - tasty-hedgehog
+    - hedgehog
+    - {{name}}
+
+{-# START_FILE Setup.hs #-}
+import Distribution.Simple
+main = defaultMain
+
+{-# START_FILE Driver.hs #-}
+{-# OPTIONS_GHC -F -pgmF tasty-discover #-}
+
+{-# START_FILE test/ExampleTest.hs #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -fno-warn-type-defaults #-}
+module ExampleTest where
+
+import EZPrelude
+
+import Data.List
+import qualified Hedgehog              as H
+import qualified Hedgehog.Gen          as Gen
+import qualified Hedgehog.Range        as Range
+import Test.Tasty
+import Test.Tasty.HUnit
+import Test.Tasty.Hspec
+import Test.Tasty.QuickCheck
+import Lib
+
+{-# ANN module "HLint: ignore Use camelCase" #-}
+{-# ANN module "HLint: ignore" #-}
+
+-- HUnit test case
+unit_listCompare :: IO ()
+unit_listCompare = [1, 2, 3] `compare` [1,2] @?= GT
+
+unit_lib :: IO ()
+unit_lib = someFunc
+
+-- QuickCheck property
+prop_additionCommutative :: Int -> Int -> Bool
+prop_additionCommutative a b = a + b == b + a
+
+-- SmallSheck property
+scprop_sortReverse :: [Int] -> Bool
+scprop_sortReverse list = sort list == sort (reverse list)
+
+-- Hspec specification
+spec_prelude :: Spec
+spec_prelude = do
+  describe "Prelude.head" $ do
+    it "returns the first element of a list" $ do
+      head [23 ..] `shouldBe` (23 :: Int)
+
+-- Tasty TestTree
+test_multiplication :: [TestTree]
+test_multiplication = [testProperty "One is identity" $ \(a :: Int) -> a * 1 == a]
+
+-- Tasty IO TestTree
+test_generateTree :: IO TestTree
+test_generateTree = do
+  input <- pure "Some input"
+  pure $ testCase input $ pure ()
+
+-- Tasty IO [TestTree]
+test_generateTrees :: IO [TestTree]
+test_generateTrees = do
+  inputs <- pure ["First input", "Second input"]
+  pure $ map (\s -> testCase s $ pure ()) inputs
+
+-- Hedgehog property
+hprop_reverse :: H.Property
+hprop_reverse = H.property $ do
+  xs <- H.forAll $ Gen.list (Range.linear 0 100) Gen.alpha
+  reverse (reverse xs) H.=== xs
+
+
+{-# START_FILE src/EZPrelude.hs #-}
+
+module EZPrelude
+  ( module E
+  , orEmpty'
+  , headSingle
+  , headSingleMay
+  )
+where
+
+import           Protolude                     as E
+import           Control.Monad.Fail            as E
+import           Data.Either.Combinators       as E
+                                                          ( mapLeft )
+import           Data.List                     as E
+                                                          ( partition )
+import           Safe                          as E
+                                                          ( at
+                                                          , fromJustNote
+                                                          , headNote
+                                                          , lastNote
+                                                          , tailNote
+                                                          )
+import           System.FilePath               as E
+                                                          ( (</>) )
+
+
+
+orEmpty' :: Alternative f => Bool -> f a -> f a
+orEmpty' b fa = if b then fa else empty
+
+headSingle :: HasCallStack => [a] -> a
+headSingle [a] = a
+headSingle _   = panic "Expected a singleton list"
+
+headSingleMay :: HasCallStack => [a] -> Maybe a
+headSingleMay [a] = Just a
+headSingleMay []  = Nothing
+headSingleMay _   = panic "Expected zero or one in list"
+
+{-# START_FILE src/Lib.hs #-}
+
+module Lib
+    ( someFunc
+    ) where
+
+import EZPrelude
+
+someFunc :: IO ()
+someFunc = putStrLn "someFunc"
+
+
+{-# START_FILE app/Main.hs #-}
+
+module Main where
+
+import EZPrelude
+
+main :: IO ()
+main = putStrLn "hello world"
+
+{-# START_FILE LICENSE #-}
+BSD 3-Clause License
+
+Copyright (c) {{year}}{{^year}}2019{{/year}}, {{author-name}}{{^author-name}}Author name here{{/author-name}}
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+{-# START_FILE README.md #-}
+# {{name}}
+
+add description of {{name}} here
+
+{-# START_FILE Makefile #-}
+package = {{name}}
+
+stack = stack
+
+main-is = {{name}}:exe:{{name}}
+
+exec = {{name}}
+
+# example: make test testopts="--ta '-p testname'"
+testopts =
+
+run: build
+	time $(stack) exec $(exec)
+
+# e.g.   make format path=app/Main.hs
+format:
+	brittany --write-mode=inplace $(path)
+
+# e.g.   make lint path=app/Main.hs
+lint:
+	hlint $(path)
+
+clean:
+	$(stack) clean
+
+purge:
+	$(stack) purge
+
+build:
+	$(stack) build --fast --ghc-options "-j4"
+
+build-profile:
+	$(stack) --work-dir .stack-work-profiling --profile build
+
+ghci:
+	$(stack) ghci --main-is $(main-is) --ghci-options='-j4 +RTS -A128m'
+
+repl: ghci
+
+test:
+	$(stack) build --test --fast $(testopts)
+
+test-ghci:
+	$(stack) ghci -test --ghci-options='-j4 +RTS -A128m'
+
+bench:
+	$(stack) build --bench --fast --ghc-options -j4
+
+ghcid:
+	$(stack) exec ghcid -- -c "stack ghci --main-is $(main-is) --test \
+	--ghci-options='-fobject-code -j4 +RTS -A128m'"
+
+dev-deps:
+	$(stack) install ghcid brittany hlint weeder
+
+.PHONY : format lint clean purge build build-profile run ghci repl test test-ghci bench ghcid reset-db dev-deps
+
+
+{-# START_FILE .gitignore #-}
+dist
+dist-*
+cabal-dev
+*.o
+*.hi
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.hpc
+.hsenv
+.cabal-sandbox/
+cabal.sandbox.config
+*.prof
+*.aux
+*.hp
+*.eventlog
+.stack-work/
+cabal.project.local
+cabal.project.local~
+.HTF/
+.ghc.environment.*
+*.cabal
+*.log
