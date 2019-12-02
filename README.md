@@ -1,2 +1,2 @@
 # stack-template
-Customized stack template
+Customized stack templates
