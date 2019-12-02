@@ -176,7 +176,7 @@ module Lib
 import EZPrelude
 
 someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+someFunc = putText "someFunc"
 
 
 {-# START_FILE app/Main.hs #-}
@@ -186,7 +186,7 @@ module Main where
 import EZPrelude
 
 main :: IO ()
-main = putStrLn "hello world"
+main = putText "hello world"
 
 {-# START_FILE LICENSE #-}
 BSD 3-Clause License
