@@ -75,7 +75,6 @@ module ExampleTest where
 
 import EZPrelude
 
-import Data.List                       hiding (head, map)
 import qualified Hedgehog              as H
 import qualified Hedgehog.Gen          as Gen
 import qualified Hedgehog.Range        as Range
@@ -98,7 +97,7 @@ prop_additionCommutative a b = a + b == b + a
 
 -- SmallSheck property
 scprop_sortReverse :: [Int] -> Bool
-scprop_sortReverse list = sort list == sort (reverse list)
+scprop_sortReverse ints = sort ints == sort (reverse ints)
 
 -- Hspec specification
 spec_prelude :: Spec
