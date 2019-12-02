@@ -49,7 +49,7 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - base
+    - base-noprelude
     - tasty
     - tasty-discover
     - tasty-hspec
@@ -152,7 +152,7 @@ import           Safe                          as E
 import           System.FilePath               as E
                                                           ( (</>) )
 
-
+type String = [Char]
 
 orEmpty' :: Alternative f => Bool -> f a -> f a
 orEmpty' b fa = if b then fa else empty
