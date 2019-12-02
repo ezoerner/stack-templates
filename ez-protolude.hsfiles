@@ -17,6 +17,9 @@ default-extensions:  OverloadedStrings, NoImplicitPrelude
 dependencies:
 - base
 - protolude
+- either
+- safe
+- filepath
 
 library:
   source-dirs: src
