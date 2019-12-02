@@ -65,7 +65,7 @@ import Distribution.Simple
 main = defaultMain
 
 {-# START_FILE test/Driver.hs #-}
-{-# OPTIONS_GHC -F -pgmF tasty-discover #-}
+{-# OPTIONS_GHC -Wwarn -F -pgmF tasty-discover #-}
 
 {-# START_FILE test/ExampleTest.hs #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -153,6 +153,7 @@ import           Safe                          as E
 import           System.FilePath               as E
                                                           ( (</>) )
 
+{-# WARNING String "'String' remains in code" #-}
 type String = [Char]
 
 orEmpty' :: Alternative f => Bool -> f a -> f a
