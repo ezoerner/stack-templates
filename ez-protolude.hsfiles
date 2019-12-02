@@ -133,6 +133,7 @@ module Prelude
   , orEmpty'
   , headSingle
   , headSingleMay
+  , String
   )
 where
 
