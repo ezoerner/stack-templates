@@ -2,10 +2,9 @@
 name:                {{name}}
 version:             0.1.0.0
 #synopsis:           Short description of your package
-#description:        Please see the README on GitHub at <https://github.com/ezoerner/empty-haskell-project#readme>
-homepage:            https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}#readme
+#description:        Please see the README on GitHub at <https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}#readme>
 author:              {{author-name}}{{^author-name}}Author name here{{/author-name}}
-copyright:           {{copyright}}{{^copyright}}{{year}}{{^year}}2019{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
+copyright:           "{{copyright}}{{^copyright}}{{year}}{{^year}}2019{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}"
 category:            {{category}}{{^category}}Example{{/category}}
 
 extra-source-files:
@@ -23,7 +22,7 @@ library:
   source-dirs: src
 
 executables:
-  template-project:
+  {{name}}:
     source-dirs:      app
     main:             Main.hs
     ghc-options:
