@@ -15,13 +15,12 @@ ghc-options: -Wall -Werror -Wno-type-defaults
 default-extensions:
 - ApplicativeDo
 - FlexibleContexts
-- NoImplicitPrelude
 - OverloadedStrings
 - ScopedTypeVariables
 - StrictData
 
 dependencies:
-- base
+- base-noprelude
 - protolude
 - either
 - safe
@@ -72,8 +71,6 @@ main = defaultMain
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module ExampleTest where
-
-import EZPrelude
 
 import qualified Hedgehog              as H
 import qualified Hedgehog.Gen          as Gen
@@ -129,9 +126,9 @@ hprop_reverse = H.property $ do
   reverse (reverse xs) H.=== xs
 
 
-{-# START_FILE src/EZPrelude.hs #-}
+{-# START_FILE src/Prelude.hs #-}
 
-module EZPrelude
+module Prelude
   ( module E
   , orEmpty'
   , headSingle
@@ -175,8 +172,6 @@ module Lib
     ( someFunc
     ) where
 
-import EZPrelude
-
 someFunc :: IO ()
 someFunc = putText "someFunc"
 
@@ -184,8 +179,6 @@ someFunc = putText "someFunc"
 {-# START_FILE app/Main.hs #-}
 
 module Main where
-
-import EZPrelude
 
 main :: IO ()
 main = putText "hello world"
