@@ -12,7 +12,13 @@ extra-source-files:
 
 ghc-options: -Wall -Werror -Wno-type-defaults
 
-default-extensions:  OverloadedStrings, NoImplicitPrelude
+default-extensions:
+- ApplicativeDo
+- FlexibleContexts
+- NoImplicitPrelude
+- OverloadedStrings
+- ScopedTypeVariables
+- StrictData
 
 dependencies:
 - base
@@ -78,9 +84,6 @@ import Test.Tasty.HUnit
 import Test.Tasty.Hspec
 import Test.Tasty.QuickCheck
 import Lib
-
-{-# ANN module "HLint: ignore Use camelCase" #-}
-{-# ANN module "HLint: ignore" #-}
 
 -- HUnit test case
 unit_listCompare :: IO ()
