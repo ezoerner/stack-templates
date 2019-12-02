@@ -59,7 +59,7 @@ tests:
 import Distribution.Simple
 main = defaultMain
 
-{-# START_FILE Driver.hs #-}
+{-# START_FILE test/Driver.hs #-}
 {-# OPTIONS_GHC -F -pgmF tasty-discover #-}
 
 {-# START_FILE test/ExampleTest.hs #-}
