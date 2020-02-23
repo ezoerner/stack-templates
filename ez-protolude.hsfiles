@@ -18,6 +18,7 @@ default-extensions:
 - OverloadedStrings
 - ScopedTypeVariables
 - StrictData
+- MultiWayIf
 
 dependencies:
 - base-noprelude
@@ -42,8 +43,8 @@ executables:
 
 tests:
   {{name}}-test:
-    main: "Driver.hs"
-    source-dirs: "test"
+    main: test.hs
+    source-dirs: test
     ghc-options:
     - -threaded
     - -rtsopts
@@ -51,11 +52,9 @@ tests:
     dependencies:
     - base-noprelude
     - tasty
-    - tasty-discover
     - tasty-hspec
     - tasty-hunit
     - tasty-quickcheck
-    - tasty-smallcheck
     - tasty-hedgehog
     - hedgehog
     - {{name}}
@@ -64,67 +63,90 @@ tests:
 import Distribution.Simple
 main = defaultMain
 
-{-# START_FILE test/Driver.hs #-}
-{-# OPTIONS_GHC -Wwarn -F -pgmF tasty-discover #-}
+{-# START_FILE test/test.hs #-}
+import           Test.Tasty
+
+import           ExampleTest
+
+main :: IO ()
+main = tests >>= defaultMain
+
+tests :: IO TestTree
+tests = testGroup "All" <$> sequence [exampleTests]
 
 {-# START_FILE test/ExampleTest.hs #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module ExampleTest where
 
-import qualified Hedgehog              as H
-import qualified Hedgehog.Gen          as Gen
-import qualified Hedgehog.Range        as Range
-import Test.Tasty
-import Test.Tasty.HUnit
-import Test.Tasty.Hspec
-import Test.Tasty.QuickCheck
-import Lib
+import qualified Hedgehog                      as H
+import qualified Hedgehog.Gen                  as Gen
+import qualified Hedgehog.Range                as Range
+import           Test.Tasty
+import qualified Test.Tasty.Hedgehog           as H
+import           Test.Tasty.HUnit
+import           Test.Tasty.Hspec
+import           Test.Tasty.QuickCheck
+import           Lib
+
+exampleTests :: IO TestTree
+exampleTests = testGroup "Example Tests" <$> sequence
+  [ testListCompare
+  , testLib
+  , testAdditionCommutative
+  , testSortReverse
+  , testPrelude
+  , testMultiplication
+  , testGenerateTree
+  , testGenerateTrees
+  , testReverse
+  ]
 
 -- HUnit test case
-unit_listCompare :: IO ()
-unit_listCompare = [1, 2, 3] `compare` [1,2] @?= GT
+testListCompare :: IO TestTree
+testListCompare =
+  pure $ testCase "List Compare" $ [1, 2, 3] `compare` [1, 2] @?= GT
 
-unit_lib :: IO ()
-unit_lib = someFunc
+testLib :: IO TestTree
+testLib = pure $ testCase "Lib Test" someFunc
 
 -- QuickCheck property
-prop_additionCommutative :: Int -> Int -> Bool
-prop_additionCommutative a b = a + b == b + a
+testAdditionCommutative :: IO TestTree
+testAdditionCommutative =
+  pure $ testProperty "Addition is commutative" $ \(a :: Int) (b :: Int) ->
+    a + b == b + a
 
--- SmallSheck property
-scprop_sortReverse :: [Int] -> Bool
-scprop_sortReverse ints = sort ints == sort (reverse ints)
+testSortReverse :: IO TestTree
+testSortReverse = pure $ testProperty "Sort reverse" $ \(ints :: [Int]) ->
+  sort ints == sort (reverse ints)
 
 -- Hspec specification
-spec_prelude :: Spec
-spec_prelude = do
-  describe "Prelude.head" $ do
-    it "returns the first element of a list" $ do
-      head [23 ..] `shouldBe` Just (23 :: Int)
+testPrelude :: IO TestTree
+testPrelude =
+  testSpec "Prelude"
+    .          describe "Prelude.head"
+    .          it "returns the first element of a list"
+    $          head [23 ..]
+    `shouldBe` Just (23 :: Int)
 
--- Tasty TestTree
-test_multiplication :: [TestTree]
-test_multiplication = [testProperty "One is identity" $ \(a :: Int) -> a * 1 == a]
+testMultiplication :: IO TestTree
+testMultiplication = pure $ testGroup
+  "Multiplication"
+  [testProperty "One is identity" $ \(a :: Int) -> a * 1 == a]
 
--- Tasty IO TestTree
-test_generateTree :: IO TestTree
-test_generateTree = do
+testGenerateTree :: IO TestTree
+testGenerateTree = do
   input <- pure "Some input"
   pure $ testCase input $ pure ()
 
--- Tasty IO [TestTree]
-test_generateTrees :: IO [TestTree]
-test_generateTrees = do
+testGenerateTrees :: IO TestTree
+testGenerateTrees = do
   inputs <- pure ["First input", "Second input"]
-  pure $ map (\s -> testCase s $ pure ()) inputs
+  pure . testGroup "Generate trees" $ map (\s -> testCase s $ pure ()) inputs
 
 -- Hedgehog property
-hprop_reverse :: H.Property
-hprop_reverse = H.property $ do
+testReverse :: IO TestTree
+testReverse = pure . H.testProperty "Reverse" . H.property $ do
   xs <- H.forAll $ Gen.list (Range.linear 0 100) Gen.alpha
   reverse (reverse xs) H.=== xs
-
 
 {-# START_FILE src/Prelude.hs #-}
 
@@ -133,7 +155,6 @@ module Prelude
   , orEmpty'
   , headSingle
   , headSingleMay
-  , String
   )
 where
 
@@ -152,9 +173,6 @@ import           Safe                          as E
                                                           )
 import           System.FilePath               as E
                                                           ( (</>) )
-
-{-# WARNING String "'String' remains in code" #-}
-type String = [Char]
 
 orEmpty' :: Alternative f => Bool -> f a -> f a
 orEmpty' b fa = if b then fa else empty
@@ -306,3 +324,13 @@ cabal.project.local~
 .ghc.environment.*
 *.cabal
 *.log
+
+{-# START_FILE scripts/helloworld.hs #-}
+#!/usr/bin/env stack
+-- stack --resolver lts-14.27 script --package turtle
+
+{-# LANGUAGE OverloadedStrings #-}  --
+                                    --
+import           Turtle                       --
+                                    --
+main = echo "Hello, world!"
