@@ -249,8 +249,8 @@ main-is = {{name}}:exe:{{name}}
 
 exec = {{name}}
 
-# example: make test testopts="--ta '-p testname'"
-testopts =
+# can limit which tests are run like: make test tests=MyTests
+tests = All
 
 run: build
 	time $(stack) exec $(exec)
@@ -281,7 +281,7 @@ ghci:
 repl: ghci
 
 test:
-	$(stack) build --test --fast $(testopts)
+	$(stack) build --test --fast -j4 -- testopts="--ta '-p $(tests)'"
 
 test-ghci:
 	$(stack) ghci -test --ghci-options='-j4 +RTS -A128m'
