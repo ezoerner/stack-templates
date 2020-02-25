@@ -281,7 +281,7 @@ ghci:
 repl: ghci
 
 test:
-	$(stack) build --test --fast -j4 -- testopts="--ta '-p $(tests)'"
+	$(stack) build --test --fast -j4 --ta '-p $(tests)'
 
 test-ghci:
 	$(stack) ghci -test --ghci-options='-j4 +RTS -A128m'
