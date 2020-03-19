@@ -280,8 +280,13 @@ ghci:
 
 repl: ghci
 
+# example of using a test pattern: make test tests="Quick Check"
 test:
-	$(stack) build --test --fast -j4 --ta '-p $(tests)'
+ifdef tests
+	stack build --test --fast --ghc-options -j4  --ta '-p "$(tests)"'
+else
+	stack build --test --fast --ghc-options -j4
+endif
 
 test-ghci:
 	$(stack) ghci -test --ghci-options='-j4 +RTS -A128m'
